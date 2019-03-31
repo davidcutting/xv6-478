@@ -1,11 +1,10 @@
-#include "pstat.h"
-
 struct buf;
 struct context;
 struct file;
 struct inode;
 struct pipe;
 struct proc;
+struct pstat;
 struct rtcdate;
 struct spinlock;
 struct sleeplock;
