@@ -117,7 +117,8 @@ int sys_getpinfo(void) {
     if(argptr(0, (void*)&pt, sizeof(struct pstat*)) < 0)
         return -1;
 
-    return pinfo(pt); // use function in proc.c for access to ptable
+    pinfo(pt);
+    return 0; // use function in proc.c for access to ptable
 }
 
 int sys_yield(void)

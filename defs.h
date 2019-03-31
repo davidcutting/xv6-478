@@ -1,3 +1,5 @@
+#include "pstat.h"
+
 struct buf;
 struct context;
 struct file;
@@ -110,7 +112,9 @@ int             growproc(int);
 int             kill(int);
 struct cpu*     mycpu(void);
 struct proc*    myproc();
+int             nproc(void);
 void            pinit(void);
+void            pinfo(struct pstat* pt);
 void            procdump(void);
 void            scheduler(void) __attribute__((noreturn));
 void            sched(void);
