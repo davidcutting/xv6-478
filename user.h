@@ -24,6 +24,9 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int date(struct rtcdate*);
+int settickets(int number); // number of tickets to set to a process
+int getpinfo(struct pstat*); // get process info
+int yield(); // yield wrapper
 
 // ulib.c
 int stat(const char*, struct stat*);

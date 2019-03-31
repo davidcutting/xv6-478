@@ -6,32 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
-
-int sys_settickets(int numberoftickets)
-{
-  if(argint(0, &numberoftickets) < 0)
-    return -1
-  acquire(&ptable.lock);
-  myproc()-> numberoftickets;
-  release(&ptable.lock);
-  return 0;
-}
-
-int sys_getpinfo(struct pstat *pt)
-{
-  acquire(&ptable.lock);
-  if(argptr(0, (void*)&pt, sizeof(struct(struct pstat*)) < 0)
-     return -1;
-    getpinfo(pt);
-     release(&ptable.lock);
-     return 0;
-}
-     
-int sys_yield(void)
-{
-  yield();
-  return 0;
-}
+#include "pstat.h"
 
 int
 sys_fork(void)
@@ -127,9 +102,38 @@ int sys_date(struct rtcdate *r) {
 int sys_settickets(void) {
     int tickets;
 
-    if(argint(0, &tickets) < 0) {
+    if(argint(0, &tickets) < 0)
         return -1;
-    }
+    if(tickets < 1 || tickets > 100000) // max number of tickets; no neg
+        return -1;
 
     myproc()->tickets = tickets; // set tickets
+    return 0;
+}
+
+int sys_getpinfo(void) {
+    struct pstat* pt;
+    struct proc* p;
+
+    if(argptr(0, (void*)&pt, sizeof(struct pstat*)) < 0)
+        return -1;
+
+    acquire(&ptable.lock);
+    int nproc = 0;
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) { // go through procs
+        if (p->state == UNUSED) break; // stop when proc is unused
+        pt->pid[nproc] = p->pid;
+        pt->tickets[nproc] = p->tickets;
+        pt->ticks[nproc] = ticks; // TODO: no clue how to get tick by proc
+        nproc++; // from 0 to unused procs
+    }
+    pt->num_processes = nproc + 1; //total = nproc + 1
+    release(&ptable.lock);
+    return 0;
+}
+
+int sys_yield(void)
+{
+    yield();
+    return 0;
 }
