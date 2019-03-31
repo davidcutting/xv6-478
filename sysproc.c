@@ -113,23 +113,11 @@ int sys_settickets(void) {
 
 int sys_getpinfo(void) {
     struct pstat* pt;
-    struct proc* p;
 
     if(argptr(0, (void*)&pt, sizeof(struct pstat*)) < 0)
         return -1;
 
-    acquire(&ptable.lock);
-    int nproc = 0;
-    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) { // go through procs
-        if (p->state == UNUSED) break; // stop when proc is unused
-        pt->pid[nproc] = p->pid;
-        pt->tickets[nproc] = p->tickets;
-        pt->ticks[nproc] = ticks; // TODO: no clue how to get tick by proc
-        nproc++; // from 0 to unused procs
-    }
-    pt->num_processes = nproc + 1; //total = nproc + 1
-    release(&ptable.lock);
-    return 0;
+    return pinfo(pt); // use function in proc.c for access to ptable
 }
 
 int sys_yield(void)
