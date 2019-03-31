@@ -90,6 +90,7 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
   p->tickets = 10;
+  p->ticks = 0;
 
   release(&ptable.lock);
 
@@ -544,7 +545,7 @@ void pinfo(struct pstat* pt) {
         if (p->state == UNUSED) continue;
         pt->pid[i] = p->pid;
         pt->tickets[i] = p->tickets;
-        pt->ticks[i] = ticks; // TODO: no clue how to get tick by proc
+        pt->ticks[i] = p->ticks; // TODO: no clue how track ticks
         i++;
     }
     pt->num_processes = i + 1;
