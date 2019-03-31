@@ -535,27 +535,18 @@ procdump(void)
   }
 }
 
-int nproc(void) {
-    struct proc* p;
-    int np = 0; // number of procs
-    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) { // go through procs
-        if (p->state == UNUSED) break; // stop when proc is unused
-        np++;
-    }
-    return np + 1;
-}
-
 void pinfo(struct pstat* pt) {
     struct proc* p;
-    int i = 0;
 
     acquire(&ptable.lock);
-    pt->num_processes = nproc();
+    int i = 0;
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) { // go through procs
+        if (p->state == UNUSED) continue;
         pt->pid[i] = p->pid;
         pt->tickets[i] = p->tickets;
         pt->ticks[i] = ticks; // TODO: no clue how to get tick by proc
         i++;
     }
+    pt->num_processes = i + 1;
     release(&ptable.lock);
 }
