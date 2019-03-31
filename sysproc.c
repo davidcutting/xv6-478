@@ -7,6 +7,32 @@
 #include "mmu.h"
 #include "proc.h"
 
+int sys_settickets(int numberoftickets)
+{
+  if(argint(0, &numberoftickets) < 0)
+    return -1
+  acquire(&ptable.lock);
+  myproc()-> numberoftickets;
+  release(&ptable.lock);
+  return 0;
+}
+
+int sys_getpinfo(struct pstat *pt)
+{
+  acquire(&ptable.lock);
+  if(argptr(0, (void*)&pt, sizeof(struct(struct pstat*)) < 0)
+     return -1;
+    getpinfo(pt);
+     release(&ptable.lock);
+     return 0;
+}
+     
+int sys_yield(void)
+{
+  yield();
+  return 0;
+}
+
 int
 sys_fork(void)
 {
