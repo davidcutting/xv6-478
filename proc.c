@@ -319,17 +319,35 @@ wait(void)
 //  - swtch to start running that process
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
+int totaltickets;
+
 void
 scheduler(void)
 {
-  struct proc *p;
-  struct cpu *c = mycpu();
-  c->proc = 0;
+  acquire(&ptable.lock);
+  struct proc* p;
+  p = ptable.proc;
+  totaltickets -= p->tickets;
+  p->tickets = 1;
+  totaltickets += p->tickets;
+  release(&ptable.lock);
   
   for(;;){
     // Enable interrupts on this processor.
     sti();
 
+    cont in winningticket = rand()%(totaltickets + 1);
+    int tcount = 0;
+    
+    acquire(&ptable.lock);
+    for(int p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    {
+      tcount += p->tickets;
+    }
+    
+    
+    
+    
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
