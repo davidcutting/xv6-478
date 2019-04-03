@@ -336,15 +336,15 @@ void scheduler(void) {
             // Switch to chosen process.  It is the process's job
             // to release ptable.lock and then reacquire it
             // before jumping back to us.
-            c->proc = p; //
+            c->proc = p; 
             switchuvm(p);
             p->state = RUNNING;
-	    p->inuse = 1;//
-	    const int tickstart = ticks;//
+	    p->using = 1;
+	    const int tickstart = ticks;
             swtch(&(c->scheduler), p->context);
 
-	    p->ticks += ticks - tickstart;//
-	    p->inuse = 0;//
+	    p->ticks += ticks - tickstart;
+	    p->using = 0;
 
             switchkvm();
 
