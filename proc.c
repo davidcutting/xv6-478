@@ -338,10 +338,12 @@ void scheduler(void) {
             // before jumping back to us.
             c->proc = p;
             switchuvm(p);
+            int ticks0 = ticks;
             p->state = RUNNING;
 
             swtch(&(c->scheduler), p->context);
             switchkvm();
+            p->ticks = p->ticks + (ticks - ticks0);
 
             // Process is done running for now.
             // It should have changed its p->state before coming back.
