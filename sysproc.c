@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "pstat.h"
 
 int
 sys_fork(void)
@@ -101,9 +102,27 @@ int sys_date(struct rtcdate *r) {
 int sys_settickets(void) {
     int tickets;
 
-    if(argint(0, &tickets) < 0) {
+    if(argint(0, &tickets) < 0)
         return -1;
-    }
+    if(tickets < 1 || tickets > 100000) // max number of tickets; no neg
+        return -1;
 
     myproc()->tickets = tickets; // set tickets
+    return 0;
+}
+
+int sys_getpinfo(void) {
+    struct pstat* pt;
+
+    if(argptr(0, (void*)&pt, sizeof(struct pstat*)) < 0)
+        return -1;
+
+    pinfo(pt);
+    return 0; // use function in proc.c for access to ptable
+}
+
+int sys_yield(void)
+{
+    yield();
+    return 0;
 }

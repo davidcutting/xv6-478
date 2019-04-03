@@ -22,3 +22,5 @@
 #define SYS_close  21
 #define SYS_date   22
 #define SYS_settickets 23
+#define SYS_getpinfo   24
+#define SYS_yield  25
