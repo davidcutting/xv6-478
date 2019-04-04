@@ -339,12 +339,11 @@ void scheduler(void) {
             c->proc = p; 
             switchuvm(p);
             p->state = RUNNING;
-	    p->using = 1;
+	  
 	    const int tickstart = ticks;
             swtch(&(c->scheduler), p->context);
 
 	    p->ticks += ticks - tickstart;
-	    p->using = 0;
 
             switchkvm();
 
