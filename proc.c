@@ -339,8 +339,9 @@ void scheduler(void) {
             c->proc = p;
             switchuvm(p);
             p->state = RUNNING;
-
+            int ticks0 = ticks; // start counting ticks
             swtch(&(c->scheduler), p->context);
+            p->ticks = p->ticks + (ticks - ticks0); // add total runtime ticks to proc
             switchkvm();
 
             // Process is done running for now.
