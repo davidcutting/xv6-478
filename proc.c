@@ -22,6 +22,15 @@ extern void trapret(void);
 
 static void wakeup1(void *chan);
 
+int total_tickets;
+void setproctickets(struct proc* pp, int n)
+{
+        total_tickets -= pp->tickets;
+        pp->tickets = n;
+        total_tickets += pp->tickets;
+}
+
+
 void pinit(void) {
     initlock(&ptable.lock, "ptable");
 }
@@ -189,7 +198,8 @@ int fork(void) {
   np->sz = curproc->sz;
   np->parent = curproc;
   *np->tf = *curproc->tf;
-
+  
+  setproctickets(np, curproc->tickets);
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
 
@@ -248,7 +258,8 @@ void exit(void) {
         wakeup1(initproc);
     }
   }
-
+  
+  setproctickets(curproc, 0);
   // Jump into the scheduler, never to return.
   curproc->state = ZOMBIE;
   sched();
@@ -280,7 +291,9 @@ int wait(void) {
         p->parent = 0;
         p->name[0] = 0;
         p->killed = 0;
+	p->ticks = 0;
         p->state = UNUSED;
+	setproctickets(p, 0);
         release(&ptable.lock);
         return pid;
       }
@@ -309,7 +322,10 @@ void scheduler(void) {
     struct proc *p;
     struct cpu *c = mycpu();
     c->proc = 0;
-
+    
+    acquire(&ptable.lock);
+    setproctickets(ptable.proc, 1);
+    release(&ptable.lock);
     for(;;) {
         sti(); // Enable interrupts on this processor.
         acquire(&ptable.lock); // make sure ptable doesnt change while sched
@@ -321,7 +337,7 @@ void scheduler(void) {
             total_tickets = total_tickets + p->tickets;
         }
 
-        srand(0); // TODO: make value variable instead of hard coded.
+        srand(8); // TODO: make value variable instead of hard coded.
         int winner = rand() % (total_tickets + 1);  // rand from 0 to total_tickets
 
         int win_count = 0;
@@ -336,20 +352,18 @@ void scheduler(void) {
             // Switch to chosen process.  It is the process's job
             // to release ptable.lock and then reacquire it
             // before jumping back to us.
-            c->proc = p; 
+            c->proc = p;
             switchuvm(p);
             p->state = RUNNING;
-	  
-	    const int tickstart = ticks;
+            const int ticks0 = ticks; // start counting ticks
             swtch(&(c->scheduler), p->context);
-
-	    p->ticks += ticks - tickstart;
-
+            p->ticks += ticks - ticks0; // add total runtime ticks to proc
+	    
             switchkvm();
-
             // Process is done running for now.
             // It should have changed its p->state before coming back.
             c->proc = 0;
+	    break;
         }
         release(&ptable.lock);
     }
