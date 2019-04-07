@@ -23,7 +23,7 @@ extern void trapret(void);
 static void wakeup1(void *chan);
 
 int total_tickets;
-void setproctickets(struct proc* pp, int n)
+void setproctickets(struct proc* pp, int n) //keep track of the number of tickets given out
 {
         total_tickets -= pp->tickets;
         pp->tickets = n;
