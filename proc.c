@@ -189,6 +189,7 @@ int fork(void) {
   np->sz = curproc->sz;
   np->parent = curproc;
   *np->tf = *curproc->tf;
+  np->tickets = curproc->tickets;
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
@@ -251,6 +252,7 @@ void exit(void) {
 
   // Jump into the scheduler, never to return.
   curproc->state = ZOMBIE;
+  curproc->tickets = 0;
   sched();
   panic("zombie exit");
 }
@@ -281,6 +283,7 @@ int wait(void) {
         p->name[0] = 0;
         p->killed = 0;
         p->state = UNUSED;
+        p->tickets = 0;
         release(&ptable.lock);
         return pid;
       }
@@ -347,6 +350,7 @@ void scheduler(void) {
             // Process is done running for now.
             // It should have changed its p->state before coming back.
             c->proc = 0;
+            break;
         }
         release(&ptable.lock);
     }
