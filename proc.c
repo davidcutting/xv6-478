@@ -199,7 +199,7 @@ int fork(void) {
   np->parent = curproc;
   *np->tf = *curproc->tf;
   
-  setproctickets(np, curproc->tickets);
+  setproctickets(np, curproc->tickets); //Child will have the same number of tickets as its parent
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
 
